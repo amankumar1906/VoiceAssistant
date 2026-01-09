@@ -14,7 +14,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentUserText, setCurrentUserText] = useState('');
   const [currentAssistantText, setCurrentAssistantText] = useState('');
   const [lastSavedUserText, setLastSavedUserText] = useState('');
@@ -34,8 +33,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const handleConnect = async () => {
     try {
-      setError(null);
-
       // Get JWT token from localStorage
       const token = localStorage.getItem('token');
       if (!token) {
@@ -54,7 +51,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           onConnect: () => {
             console.log('Connected to voice session');
             setIsConnected(true);
-            setError(null);
           },
           onDisconnect: () => {
             console.log('Disconnected from voice session');
@@ -64,7 +60,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           },
           onError: (err) => {
             console.error('Voice error:', err);
-            setError(err.message);
             setIsConnected(false);
           },
           onTranscriptUpdate: (text, role, isFinal) => {
@@ -129,7 +124,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
     } catch (err) {
       console.error('Failed to connect:', err);
-      setError(err instanceof Error ? err.message : 'Failed to connect');
     }
   };
 
@@ -147,7 +141,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     } else {
       // Start recording
       try {
-        setError(null);
         // Reset transcript buffers for new recording
         userTranscriptBuffer.current = '';
         setCurrentUserText('');
@@ -156,7 +149,6 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         setIsRecording(true);
       } catch (err) {
         console.error('Failed to start recording:', err);
-        setError('Failed to access microphone. Please grant permission.');
       }
     }
   };
