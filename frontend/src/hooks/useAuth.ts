@@ -34,7 +34,9 @@ class AuthStore {
 
   subscribe(listener: () => void) {
     this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 }
 
@@ -42,12 +44,12 @@ const authStore = new AuthStore();
 
 export const useAuth = (): AuthState => {
   const [state, setState] = React.useState(authStore.getState());
-  const [isInitialized, setIsInitialized] = React.useState(false);
 
   React.useEffect(() => {
-    return authStore.subscribe(() => {
+    const unsubscribe = authStore.subscribe(() => {
       setState(authStore.getState());
     });
+    return unsubscribe;
   }, []);
 
   // Auto-login on mount if token exists
@@ -73,7 +75,6 @@ export const useAuth = (): AuthState => {
           });
         }
       }
-      setIsInitialized(true);
     };
 
     initAuth();

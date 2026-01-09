@@ -18,9 +18,7 @@ router.post('/session', async (req: AuthRequest, res: Response) => {
     const session = await createRealtimeSession(req.user!.id);
 
     res.json({
-      sessionId: session.id,
-      clientSecret: session.client_secret,
-      expiresAt: session.expires_at,
+      session: session,
       functions: functionDefinitions
     });
   } catch (error) {
