@@ -13,6 +13,19 @@ import { handleVoiceWebSocket, startHeartbeat } from './services/voiceWebSocket'
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['DATABASE_URL', 'OPENAI_API_KEY', 'JWT_SECRET', 'FRONTEND_URL'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(varName => console.error(`   - ${varName}`));
+  console.error('\nPlease check your .env file and ensure all required variables are set.');
+  process.exit(1);
+}
+
+console.log('✓ All required environment variables are set');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

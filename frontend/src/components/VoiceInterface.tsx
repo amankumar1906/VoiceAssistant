@@ -7,6 +7,8 @@ interface VoiceInterfaceProps {
   onMessageAdded: (message: Message) => void;
 }
 
+const MAX_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+
 export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   conversationId,
   onMessageAdded
@@ -18,6 +20,7 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const [currentAssistantText, setCurrentAssistantText] = useState('');
   const [lastSavedUserText, setLastSavedUserText] = useState('');
   const [lastSavedAssistantText, setLastSavedAssistantText] = useState('');
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
 
   const clientRef = useRef<RealtimeVoiceClient | null>(null);
   const userTranscriptBuffer = useRef('');
@@ -30,6 +33,18 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       }
     };
   }, []);
+
+  // Session duration limit
+  useEffect(() => {
+    if (!isConnected || !sessionStartTime) return;
+
+    const timeoutId = setTimeout(() => {
+      alert('Session limit reached (10 minutes). Disconnecting to manage API costs.');
+      handleDisconnect();
+    }, MAX_DURATION_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [isConnected, sessionStartTime]);
 
   const handleConnect = async () => {
     try {
@@ -51,6 +66,7 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           onConnect: () => {
             console.log('Connected to voice session');
             setIsConnected(true);
+            setSessionStartTime(Date.now());
           },
           onDisconnect: () => {
             console.log('Disconnected from voice session');
@@ -148,6 +164,14 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         await clientRef.current.startRecording();
         setIsRecording(true);
       } catch (err) {
+        const error = err as Error;
+        if (error.name === 'NotAllowedError') {
+          alert('Microphone access denied. Please allow microphone access in your browser settings.');
+        } else if (error.name === 'NotFoundError') {
+          alert('No microphone found. Please connect a microphone and try again.');
+        } else {
+          alert('Failed to start recording. Please check your microphone settings.');
+        }
         console.error('Failed to start recording:', err);
       }
     }
@@ -163,6 +187,7 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     setIsSpeaking(false);
     setCurrentUserText('');
     setCurrentAssistantText('');
+    setSessionStartTime(null);
   };
 
   return (
@@ -184,8 +209,12 @@ export const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       {/* Connection Status */}
       {!isConnected ? (
         <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-4 text-sm">
             Start a voice conversation with your Daily Companion
+            <br />
+            <span className="text-gray-500 text-xs">
+              Note: First connection may take 10-30 seconds if the server was sleeping.
+            </span>
           </p>
           <button
             onClick={handleConnect}

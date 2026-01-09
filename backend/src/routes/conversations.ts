@@ -4,6 +4,10 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Input validation constants
+const MAX_TITLE_LENGTH = 100;
+const MAX_MESSAGE_LENGTH = 5000;
+
 // All routes require authentication
 router.use(authMiddleware);
 
@@ -25,7 +29,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 // Create new conversation
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { title } = req.body;
+    const title = req.body.title?.trim();
+
+    // Validate title
+    if (!title || title.length === 0 || title.length > MAX_TITLE_LENGTH) {
+      return res.status(400).json({ error: `Title must be 1-${MAX_TITLE_LENGTH} characters` });
+    }
 
     const result = await pool.query(
       'INSERT INTO conversations (user_id, title) VALUES ($1, $2) RETURNING *',
@@ -117,7 +126,18 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/:id/messages', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { role, content, audio_url } = req.body;
+    const { role, audio_url } = req.body;
+    const content = req.body.content?.trim();
+
+    // Validate content
+    if (!content || content.length === 0 || content.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ error: `Message must be 1-${MAX_MESSAGE_LENGTH} characters` });
+    }
+
+    // Validate role
+    if (!role || !['user', 'assistant'].includes(role)) {
+      return res.status(400).json({ error: 'Role must be either "user" or "assistant"' });
+    }
 
     // Verify conversation belongs to user
     const convResult = await pool.query(

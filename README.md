@@ -273,7 +273,7 @@ The key was making these functions actually useful, not just checking a box. Whe
 
 Given more time, I would add:
 
-1. **Complete Voice Interface**: Full WebSocket implementation with audio visualization
+1. **Audio Visualization**: Waveform display while speaking/listening
 2. **Mobile App**: React Native version for better mobile experience
 3. **Push Notifications**: Daily check-in reminders
 4. **Mood Tracking**: Visual charts showing mood patterns over time
@@ -302,6 +302,13 @@ Given more time, I would add:
 - Kept frontend state management simple (custom hook vs Redux)
 - Used PostgreSQL directly instead of an ORM (Prisma/TypeORM) for simplicity
 - Implemented custom JWT instead of using Passport.js for lighter weight
+
+### Test Coverage:
+Due to the 24-hour time constraint, automated tests were not implemented. In a production environment, I would add:
+
+- Unit tests for function calling logic
+- Integration tests for API endpoints
+- E2E tests for critical user flows (signup → conversation → voice)
 
 ## Questions & Support
 
