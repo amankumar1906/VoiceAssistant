@@ -1,8 +1,12 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import dns from 'dns';
 
 // Ensure environment variables are loaded
 dotenv.config();
+
+// Force Node.js to prefer IPv4 over IPv6
+dns.setDefaultResultOrder('ipv4first');
 
 // Validate DATABASE_URL exists
 if (!process.env.DATABASE_URL) {
