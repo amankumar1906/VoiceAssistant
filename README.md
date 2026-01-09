@@ -12,11 +12,12 @@ Daily Companion is a voice-first wellness application that uses OpenAI's Realtim
 - **Context-Aware Responses**: The AI remembers your previous conversations and what makes you happy
 - **Personalized Activity Suggestions**: Get tailored recommendations based on your mood, available time, and preferences
 - **Conversation History**: View and manage all your past conversations
-- **Function Calling**: Four intelligent functions that help the AI provide personalized support:
+- **Function Calling**: Five intelligent functions that help the AI provide personalized support:
   - `getUserHappyMemories`: Retrieves things you've mentioned that make you happy
   - `saveConversationInsight`: Saves important insights about you for future conversations
   - `suggestActivity`: Suggests personalized activities based on your mood and time
   - `getRecentTopics`: Recalls what you've discussed recently for better context
+  - `getTimeContext`: Provides time-aware suggestions (morning energy vs evening wind-down)
 
 ## Tech Stack
 
@@ -218,31 +219,33 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 After deploying frontend, update the backend's `FRONTEND_URL` environment variable in Railway with your Vercel URL.
 
-## Product Decisions
+## My Thought Process
 
-### Why Voice-First?
-Voice creates a more natural, intimate experience for wellness conversations. It's easier to express feelings through speech than typing.
+### The Product Concept
+When I read the requirements, I knew I didn't want to build yet another generic chatbot. I've used plenty of AI assistants that forget everything you tell them the moment you close the tab. That sucks.
 
-### Why Focus on "What Makes You Happy"?
-Instead of trying to be a generic AI therapist, Daily Companion has a clear, specific purpose: helping users remember and engage with things that bring them joy. This makes it more useful and memorable.
+So I focused on one specific problem: helping people remember what makes them happy. We all have those activities or moments that lift our mood, but sometimes we forget about them when we're feeling down. That's where Daily Companion comes in.
 
-### Why Function Calling?
-The four function calls enable the AI to:
-1. Access user's history of happy moments
-2. Save new insights for future conversations
-3. Provide genuinely personalized suggestions
-4. Maintain conversation context over time
+### The Function Calling Strategy
+This was the fun part. I implemented five functions that work together:
 
-This transforms it from a stateless chatbot into a companion that actually remembers you.
+1. **getUserHappyMemories** - Pulls up things you've mentioned that make you happy
+2. **saveConversationInsight** - Stores new insights about you (like "loves running")
+3. **suggestActivity** - Recommends personalized activities based on mood and time
+4. **getRecentTopics** - Recalls recent conversations for better context
+5. **getTimeContext** - Checks the time of day to give contextual suggestions (morning energy boost vs evening wind-down)
 
-### Why Custom JWT Instead of Supabase Auth?
-- Simpler implementation for a 24-hour project
-- No email verification required - users can sign up and start immediately
-- Full control over the authentication flow
-- Easier to debug and understand
+The key was making these functions actually useful, not just checking a box. When you tell Daily Companion "I love running," it saves that. Next time you're feeling low, it can suggest going for a run because it knows that's your thing. And if it's 10 PM, it won't suggest high-energy activities - it'll recommend something that fits the evening vibe.
 
-### Why GPT-4o-mini?
-Cost efficiency. At ~$0.01-0.04 per minute, it's the cheapest option for the Realtime API while still providing great conversational quality.
+### Tech Choices
+
+**Custom JWT auth instead of Supabase Auth:** I had 24 hours. Email verification flows would've eaten into time I wanted to spend on the core features. Plus, for a demo project, simple email/password is fine.
+
+**Direct PostgreSQL instead of an ORM:** I know my way around SQL, and Prisma/TypeORM would've added another layer to debug. Kept it simple.
+
+**GPT-4o Realtime:** It's the cheapest option at ~$0.01-0.04 per minute while still being pretty good. In production, I'd probably add usage limits, but for a demo this works.
+
+**Monorepo structure:** Makes local development easier. In a real production setup, I might split these into separate repos, but for this project it made sense to keep everything together.
 
 ## Known Limitations
 

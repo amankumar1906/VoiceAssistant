@@ -63,6 +63,14 @@ export const functionDefinitions = [
         }
       }
     }
+  },
+  {
+    name: 'getTimeContext',
+    description: 'Get current time context (morning, afternoon, evening, late night) to provide time-appropriate suggestions',
+    parameters: {
+      type: 'object',
+      properties: {}
+    }
   }
 ];
 
@@ -89,6 +97,9 @@ export const executeFunctionCall = async (
 
     case 'getRecentTopics':
       return await getRecentTopics(userId, args.days || 7);
+
+    case 'getTimeContext':
+      return getTimeContext();
 
     default:
       throw new Error(`Unknown function: ${functionName}`);
@@ -148,5 +159,70 @@ const getRecentTopics = async (userId: string, days: number) => {
   return {
     topics: result.rows.map(r => r.content),
     count: result.rows.length
+  };
+};
+
+const getTimeContext = () => {
+  const now = new Date();
+  const hour = now.getHours();
+
+  let timeOfDay: string;
+  let greeting: string;
+  let energyLevel: string;
+  let suggestions: string[];
+
+  if (hour >= 5 && hour < 12) {
+    timeOfDay = 'morning';
+    greeting = 'Good morning';
+    energyLevel = 'fresh and energized';
+    suggestions = [
+      'Go for a morning walk or run',
+      'Do some stretching or yoga',
+      'Enjoy a healthy breakfast',
+      'Set intentions for the day',
+      'Listen to uplifting music'
+    ];
+  } else if (hour >= 12 && hour < 17) {
+    timeOfDay = 'afternoon';
+    greeting = 'Good afternoon';
+    energyLevel = 'active and productive';
+    suggestions = [
+      'Take a short walk outside',
+      'Have a healthy snack',
+      'Do a quick workout',
+      'Connect with a friend',
+      'Work on a creative project'
+    ];
+  } else if (hour >= 17 && hour < 22) {
+    timeOfDay = 'evening';
+    greeting = 'Good evening';
+    energyLevel = 'winding down';
+    suggestions = [
+      'Cook a favorite meal',
+      'Read something enjoyable',
+      'Practice gratitude journaling',
+      'Take a relaxing bath',
+      'Call a loved one'
+    ];
+  } else {
+    timeOfDay = 'late night';
+    greeting = 'Hello';
+    energyLevel = 'relaxed and calm';
+    suggestions = [
+      'Practice deep breathing',
+      'Listen to calming music',
+      'Do some gentle stretching',
+      'Write in a journal',
+      'Prepare for restful sleep'
+    ];
+  }
+
+  return {
+    timeOfDay,
+    hour,
+    greeting,
+    energyLevel,
+    suggestions,
+    timestamp: now.toISOString()
   };
 };
